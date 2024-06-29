@@ -12,8 +12,7 @@
 
 并且都是柯南的头像
 
-![WechatIMG1](https://user-images.githubusercontent.com/9566402/185802023-1f28c90a-40e7-446e-8dad-420c83f83e38.jpeg)
-![WechatIMG2](https://user-images.githubusercontent.com/9566402/185802026-ef7c1b99-66a8-4535-a6a4-804677657667.jpeg)
+
 
 ---------------------- 以下是正文 ----------------------
 
