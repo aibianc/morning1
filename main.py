@@ -129,7 +129,7 @@ try:
     weather, temperature = get_weather()
     love_days = get_count()
     birthday_left = get_birthday()
-    words_parts = get_words("只佩服张幼仪，不容易，尽管从小接受的是封建教育，还被渣男抛弃，一个孕妇在外国没钱没人脉，最后却自立自强，忍受偏见，成为一个女强人。可怜念了徐志摩一辈子，世人都在赞颂康桥故事")
+    words_parts = get_words()
     
     # 将分割后的句子赋值给对应的键
     data = {
