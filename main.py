@@ -47,7 +47,6 @@ def get_birthday():
     logging.info(f"Days left for birthday: {days_left}")
     return days_left
 
-
 def get_words(test_words=None):
     try:
         if test_words:
@@ -73,8 +72,8 @@ def get_words(test_words=None):
         words_parts = split_words(formatted_words)
         logging.info(f"Words Parts: {words_parts}")
         
-        # 返回分割后的结果
-        return words_parts
+        # 返回分割后的结果，最多返回六段
+        return words_parts[:6]
     except requests.RequestException as e:
         logging.error(f"Error fetching words: {e}")
         return ["每天都要爱自己奥！"] * 6  # 返回默认值
@@ -92,7 +91,6 @@ def split_words(words):
     while len(words_parts) < 6:
         words_parts.append("")
     return words_parts
-
 
 def format_daily_quote(text):
     # 分割文本为句子
@@ -131,25 +129,28 @@ try:
     weather, temperature = get_weather()
     love_days = get_count()
     birthday_left = get_birthday()
-    words = get_words("只佩服张幼仪，不容易，尽管从小接受的是封建教育，还被渣男抛弃，一个孕妇在外国没钱没人脉，最后却自立自强，忍受偏见，成为一个女强人。可怜念了徐志摩一辈子，世人都在赞颂康桥故事")
+    words_parts = get_words("只佩服张幼仪，不容易，尽管从小接受的是封建教育，还被渣男抛弃，一个孕妇在外国没钱没人脉，最后却自立自强，忍受偏见，成为一个女强人。可怜念了徐志摩一辈子，世人都在赞颂康桥故事")
     
+    # 将分割后的句子赋值给对应的键
     data = {
         "weather": {"value": weather},
         "temperature": {"value": temperature},
         "love_days": {"value": love_days},
         "birthday_left": {"value": birthday_left},
-        "words1": {"value": words1},
-        "words2": {"value": words2},
-        "words3": {"value": words3},
-        "words4": {"value": words4},
-        "words5": {"value": words5},
-        "words6": {"value": words6}
+        "words1": {"value": words_parts[0]},
+        "words2": {"value": words_parts[1]},
+        "words3": {"value": words_parts[2]},
+        "words4": {"value": words_parts[3]},
+        "words5": {"value": words_parts[4]},
+        "words6": {"value": words_parts[5]}
     }
     
     # 打印所有数据
     logging.info(f"Data to be sent: {data}")
     
+    # 发送模板消息
     response = wm.send_template(user_id, template_id, data)
     logging.info(f"Message sent successfully: {response}")
 except Exception as e:
     logging.error(f"An error occurred: {e}")
+
