@@ -1,8 +1,8 @@
-from datetime import date, datetime
+import requests
+from datetime import datetime
 import math
 from wechatpy import WeChatClient
 from wechatpy.client.api import WeChatMessage
-import requests
 import os
 import logging
 import re
@@ -23,15 +23,69 @@ template_id = os.environ["TEMPLATE_ID"]
 
 def get_weather():
     try:
-        url = f"http://autodev.openspeech.cn/csp/api/v2.1/weather?openId=aiuicus&clientType=android&sign=android&city={city}"
+        url = f"https://devapi.qweather.com/v7/weather/3d?location={city}&key=a4317352c6e444e683112ac77c3896b8"
         res = requests.get(url)
         res.raise_for_status()
-        weather = res.json()['data']['list'][0]
-        logging.info(f"Weather: {weather['weather']}, Temperature: {weather['temp']}")
-        return weather['weather'], math.floor(weather['temp'])
+        weather_data = res.json()
+        daily_weather = weather_data.get('daily', [{}])[0]
+        if daily_weather:
+            weather_date = daily_weather.get('fxDate', '未知')
+            weather_temp_max = math.floor(float(daily_weather.get('tempMax', 0)))
+            weather_temp_min = math.floor(float(daily_weather.get('tempMin', 0)))
+            weather_day = daily_weather.get('textDay', '未知')
+            sunset_time = daily_weather.get('sunset', '未知')
+            moon_phase = daily_weather.get('moonPhase', '未知')
+            uv_index = int(daily_weather.get('uvIndex', 0))
+            uv_warning = ""
+            umbrella_reminder = ""
+            
+            if uv_index > 7 and uv_index < 9:
+                uv_warning = "今天紫外线稍强，请注意防晒。"
+            elif uv_index >= 9:
+                uv_warning = "今天紫外线很强，请外出时做好防晒措施。"
+
+            if '雨' in weather_day:
+                umbrella_reminder = "今天天气有雨，请记得携带雨伞。"
+
+            today_weather = {
+                'weather_date': weather_date,
+                'weather_temp_max': weather_temp_max,
+                'weather_temp_min': weather_temp_min,
+                'weather_day': weather_day,
+                'sunset_time': sunset_time,
+                'moon_phase': moon_phase,
+                'uv_index': uv_index,
+                'uv_warning': uv_warning,
+                'umbrella_reminder': umbrella_reminder
+            }
+            
+            logging.info(f"Weather data: {today_weather}")
+            return today_weather
+        else:
+            return {
+                'weather_date': '未知',
+                'weather_temp_max': 0,
+                'weather_temp_min': 0,
+                'weather_day': '未知',
+                'sunset_time': '未知',
+                'moon_phase': '未知',
+                'uv_index': 0,
+                'uv_warning': '',
+                'umbrella_reminder': ''
+            }
     except requests.RequestException as e:
         logging.error(f"Error fetching weather data: {e}")
-        return "未知", 0
+        return {
+            'weather_date': '未知',
+            'weather_temp_max': 0,
+            'weather_temp_min': 0,
+            'weather_day': '未知',
+            'sunset_time': '未知',
+            'moon_phase': '未知',
+            'uv_index': 0,
+            'uv_warning': '',
+            'umbrella_reminder': ''
+        }
 
 def get_count():
     delta = today - datetime.strptime(start_date, "%Y-%m-%d")
@@ -126,15 +180,22 @@ try:
     client = WeChatClient(app_id, app_secret)
     wm = WeChatMessage(client)
     
-    weather, temperature = get_weather()
+    today_weather = get_weather()
     love_days = get_count()
     birthday_left = get_birthday()
     words_parts = get_words()
     
-    # 将分割后的句子赋值给对应的键
+    # 构建 data 字典，使用更具描述性的键名和额外的字段
     data = {
-        "weather": {"value": weather},
-        "temperature": {"value": temperature},
+        "weather_date": {"value": today_weather['weather_date']},
+        "weather_temp_max": {"value": today_weather['weather_temp_max']},
+        "weather_temp_min": {"value": today_weather['weather_temp_min']},
+        "weather_day": {"value": today_weather['weather_day']},
+        "sunset_time": {"value": today_weather['sunset_time']},
+        "moon_phase": {"value": today_weather['moon_phase']},
+        "uv_index": {"value": today_weather['uv_index']},
+        "uv_warning": {"value": today_weather['uv_warning']},
+        "umbrella_reminder": {"value": today_weather['umbrella_reminder']},
         "love_days": {"value": love_days},
         "birthday_left": {"value": birthday_left},
         "words1": {"value": words_parts[0]},
@@ -153,4 +214,3 @@ try:
     logging.info(f"Message sent successfully: {response}")
 except Exception as e:
     logging.error(f"An error occurred: {e}")
-
