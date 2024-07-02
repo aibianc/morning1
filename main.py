@@ -21,14 +21,14 @@ app_secret = os.environ["APP_SECRET"]
 user_id = os.environ["USER_ID"]
 template_id = os.environ["TEMPLATE_ID"]
 
-logger.info(f"当前日期和时间: {today}")
-logger.info(f"开始日期: {start_date}")
-logger.info(f"城市: {city}")
-logger.info(f"生日: {birthday}")
-logger.info(f"应用ID: {app_id}")
-logger.info(f"应用密钥: {app_secret}")
-logger.info(f"用户ID: {user_id}")
-logger.info(f"模板ID: {template_id}")
+logging.info(f"当前日期和时间: {today}")
+logging.info(f"开始日期: {start_date}")
+logging.info(f"城市: {city}")
+logging.info(f"生日: {birthday}")
+logging.info(f"应用ID: {app_id}")
+logging.info(f"应用密钥: {app_secret}")
+logging.info(f"用户ID: {user_id}")
+logging.info(f"模板ID: {template_id}")
 
 def get_weather():
     try:
