@@ -56,15 +56,42 @@ def get_words(test_words=None):
             response = requests.get("https://api.xygeng.cn/one")
             response.raise_for_status()
             words = response.json()['data']['content']
-        
+
+        # 格式化处理每日一言，根据需要进行分割
         formatted_words = format_daily_quote(words)
+        logging.info(f"Original Words: {words}")
         logging.info(f"Formatted Words: {formatted_words}")
-        return formatted_words
+
+        if len(formatted_words) > 114:
+            logging.warning("Daily quote length exceeds 114 characters. Fetching a new quote.")
+            response = requests.get("https://api.xygeng.cn/one")
+            response.raise_for_status()
+            words = response.json()['data']['content']
+            formatted_words = format_daily_quote(words)
+
+        # 分割处理
+        words_parts = split_words(formatted_words)
+        logging.info(f"Words Parts: {words_parts}")
+        
+        # 返回分割后的结果
+        return words_parts
     except requests.RequestException as e:
         logging.error(f"Error fetching words: {e}")
-        return "每天都要爱自己奥！"
+        return ["每天都要爱自己奥！"] * 6  # 返回默认值
 
-
+def split_words(words):
+    # 根据长度分割成最多6段，每段不超过19个中文字符
+    max_length = 19
+    words_parts = []
+    while len(words) > max_length:
+        words_parts.append(words[:max_length])
+        words = words[max_length:]
+    if words:
+        words_parts.append(words)
+    # 填充到6段
+    while len(words_parts) < 6:
+        words_parts.append("")
+    return words_parts
 
 
 def format_daily_quote(text):
@@ -111,7 +138,12 @@ try:
         "temperature": {"value": temperature},
         "love_days": {"value": love_days},
         "birthday_left": {"value": birthday_left},
-        "words": {"value": words}
+        "words1": {"value": words1},
+        "words2": {"value": words2},
+        "words3": {"value": words3},
+        "words4": {"value": words4},
+        "words5": {"value": words5},
+        "words6": {"value": words6}
     }
     
     # 打印所有数据
