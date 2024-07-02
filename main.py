@@ -224,7 +224,7 @@ try:
         "uv_warning": {"value": today_weather['uv_warning']},
         "umbrella_reminder": {"value": today_weather['umbrella_reminder']},
         "love_days": {"value": love_days},
-        "an_message":{"value" anniversary_message},
+        "an_message":{"value": anniversary_message},
         "birthday_left": {"value": birthday_left},
         "birthday_wish": {"value": birthday_wish}, 
         "words1": {"value": words_parts[0]},
