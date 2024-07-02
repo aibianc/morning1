@@ -13,7 +13,7 @@ jobs:
       APP_ID: ${{ secrets.APP_ID }}
       APP_SECRET: ${{ secrets.APP_SECRET }}
       TEMPLATE_ID: ${{ secrets.Y_TEM_ID }}
-      USER_ID: ${{ secrets.Y_USER_ID }}
+      USER_ID: ${{ secrets.USER_ID }}
       START_DATE: ${{ secrets.Y_START_DATE }}
       BIRTHDAY: ${{ secrets.Y_BIRTHDAY }}
       CITY: ${{ secrets.Y_CITY }}
