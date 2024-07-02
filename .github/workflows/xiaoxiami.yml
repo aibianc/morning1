@@ -7,7 +7,7 @@ on:
 jobs:
   send_message:
     runs-on: ubuntu-latest
-    name: Send morning message to your girlfriend
+    name: Send morning message to your friend
 
     env:
       APP_ID: ${{ secrets.APP_ID }}
