@@ -27,6 +27,7 @@ def get_weather():
         res = requests.get(url)
         res.raise_for_status()
         weather = res.json()['data']['list'][0]
+        logging.info(f"Weather: {weather['weather']}, Temperature: {weather['temp']}")
         return weather['weather'], math.floor(weather['temp'])
     except requests.RequestException as e:
         logging.error(f"Error fetching weather data: {e}")
@@ -34,38 +35,53 @@ def get_weather():
 
 def get_count():
     delta = today - datetime.strptime(start_date, "%Y-%m-%d")
-    return delta.days
+    count = delta.days
+    logging.info(f"Love days count: {count}")
+    return count
 
 def get_birthday():
     next_birthday = datetime.strptime(f"{date.today().year}-{birthday}", "%Y-%m-%d")
     if next_birthday < today:
         next_birthday = next_birthday.replace(year=next_birthday.year + 1)
-    return (next_birthday - today).days
+    days_left = (next_birthday - today).days
+    logging.info(f"Days left for birthday: {days_left}")
+    return days_left
 
 def get_words():
     try:
         response = requests.get("https://api.xygeng.cn/one")
         response.raise_for_status()
-        return response.json()['data']['content']
+        words = response.json()['data']['content']
+        logging.info(f"Words: {words}")
+        return words
     except requests.RequestException as e:
         logging.error(f"Error fetching words: {e}")
         return "每天都要爱自己奥！"
 
 def get_random_color():
-    return f"#{random.randint(0, 0xFFFFFF):06x}"
+    color = f"#{random.randint(0, 0xFFFFFF):06x}"
+    logging.info(f"Generated color: {color}")
+    return color
 
 try:
     client = WeChatClient(app_id, app_secret)
     wm = WeChatMessage(client)
     
     weather, temperature = get_weather()
+    love_days = get_count()
+    birthday_left = get_birthday()
+    words = get_words()
+    
     data = {
         "weather": {"value": weather, "color": get_random_color()},
         "temperature": {"value": temperature, "color": get_random_color()},
-        "love_days": {"value": get_count(), "color": get_random_color()},
-        "birthday_left": {"value": get_birthday(), "color": get_random_color()},
-        "words": {"value": get_words(), "color": get_random_color()}
+        "love_days": {"value": love_days, "color": get_random_color()},
+        "birthday_left": {"value": birthday_left, "color": get_random_color()},
+        "words": {"value": words, "color": get_random_color()}
     }
+    
+    # 打印所有数据
+    logging.info(f"Data to be sent: {data}")
     
     response = wm.send_template(user_id, template_id, data)
     logging.info(f"Message sent successfully: {response}")
