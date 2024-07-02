@@ -21,6 +21,15 @@ app_secret = os.environ["APP_SECRET"]
 user_id = os.environ["USER_ID"]
 template_id = os.environ["TEMPLATE_ID"]
 
+logger.info(f"当前日期和时间: {today}")
+logger.info(f"开始日期: {start_date}")
+logger.info(f"城市: {city}")
+logger.info(f"生日: {birthday}")
+logger.info(f"应用ID: {app_id}")
+logger.info(f"应用密钥: {app_secret}")
+logger.info(f"用户ID: {user_id}")
+logger.info(f"模板ID: {template_id}")
+
 def get_weather():
     try:
         url = f"https://devapi.qweather.com/v7/weather/3d?location={city}&key=a4317352c6e444e683112ac77c3896b8"
@@ -91,15 +100,33 @@ def get_count():
     delta = today - datetime.strptime(start_date, "%Y-%m-%d")
     count = delta.days
     logging.info(f"Love days count: {count}")
-    return count
+
+    # 判断是否满足特定的纪念日条件（比如100、200、300...天）
+    if count > 0 and count % 100 == 0:
+        anniversary_message = f"今天我们认识满{count}天啦！"
+        logging.info(f"Anniversary message: {anniversary_message}")
+    else:
+        anniversary_message = None
+
+    return count, anniversary_message
 
 def get_birthday():
     next_birthday = datetime.strptime(f"{date.today().year}-{birthday}", "%Y-%m-%d")
     if next_birthday < today:
         next_birthday = next_birthday.replace(year=next_birthday.year + 1)
     days_left = (next_birthday - today).days
+
+    # 判断是否为生日当天
+    if days_left == 0:
+        birthday_wish = "记得嘛，今天是小寿星嗷！生日快乐！"
+    else:
+        birthday_wish = ""
+    
     logging.info(f"Days left for birthday: {days_left}")
-    return days_left
+    logging.info(f"Birthday wish: {birthday_wish}")
+    
+    return days_left, birthday_wish
+
 
 def get_words(test_words=None):
     try:
@@ -181,8 +208,8 @@ try:
     wm = WeChatMessage(client)
     
     today_weather = get_weather()
-    love_days = get_count()
-    birthday_left = get_birthday()
+    love_days, anniversary_message = get_count()  
+    birthday_left, birthday_wish = get_birthday()
     words_parts = get_words()
     
     # 构建 data 字典，使用更具描述性的键名和额外的字段
@@ -197,7 +224,9 @@ try:
         "uv_warning": {"value": today_weather['uv_warning']},
         "umbrella_reminder": {"value": today_weather['umbrella_reminder']},
         "love_days": {"value": love_days},
+        "an_message":{"value" anniversary_message},
         "birthday_left": {"value": birthday_left},
+        "birthday_wish": {"value": birthday_wish}, 
         "words1": {"value": words_parts[0]},
         "words2": {"value": words_parts[1]},
         "words3": {"value": words_parts[2]},
