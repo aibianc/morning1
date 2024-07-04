@@ -110,28 +110,30 @@ def format_data(english_sentence, chinese_sentence):
     return words
 
 try:
-    # 获取每日英语和中文句子
-    english_sentence, chinese_sentence = fetch_daily_english()
+    english_sentence = None
+    chinese_sentence = None
 
-    if english_sentence and chinese_sentence:
-        # 格式化句子并构建data字典
-        words = format_data(english_sentence, chinese_sentence)
-        data = {}
-        
-        # 组装data字典
-        for i in range(20):
-            data[f"words{i + 1}"] = {"value": words[i]}
+    # 获取每日英语和中文句子，确保每次都能获取到合适长度的句子
+    while not english_sentence or len(english_sentence) > 120 or len(chinese_sentence) > 40:
+        english_sentence, chinese_sentence = fetch_daily_english()
+    
+    # 格式化句子并构建data字典
+    words = format_data(english_sentence, chinese_sentence)
+    data = {}
+    
+    # 组装data字典
+    for i in range(20):
+        data[f"words{i + 1}"] = {"value": words[i]}
 
-        logging.info(f"Data to be sent: {data}")
-        
-        # 初始化微信客户端和消息对象
-        client = WeChatClient(app_id, app_secret)
-        wm = WeChatMessage(client)
+    logging.info(f"Data to be sent: {data}")
+    
+    # 初始化微信客户端和消息对象
+    client = WeChatClient(app_id, app_secret)
+    wm = WeChatMessage(client)
 
-        # 发送模板消息
-        response = wm.send_template(user_id, template_id, data)
-        logging.info(f"Message sent successfully: {response}")
-    else:
-        logging.warning("Failed to fetch daily English and Chinese sentences.")
+    # 发送模板消息
+    response = wm.send_template(user_id, template_id, data)
+    logging.info(f"Message sent successfully: {response}")
+
 except Exception as e:
     logging.error(f"An error occurred: {e}")
