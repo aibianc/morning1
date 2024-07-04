@@ -33,7 +33,7 @@ jobs:
     - name: Run script and capture output
       id: run_script
       run: |
-        python main.py 2>&1 | tee script_output.log
+        python english_push.py 2>&1 | tee script_output.log
 
     - name: Send email on success or failure
       if: always()  # This ensures the step runs regardless of the result of the previous steps
