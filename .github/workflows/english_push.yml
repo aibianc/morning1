@@ -1,0 +1,61 @@
+name: english_push
+on:
+  schedule:
+    - cron: '26 23 * * *'
+  workflow_dispatch:
+
+jobs:
+  send_message:
+    runs-on: ubuntu-latest
+    name: Send morning message to your friend
+
+    env:
+      APP_ID: ${{ secrets.APP_ID }}
+      APP_SECRET: ${{ secrets.APP_SECRET }}
+      TEMPLATE_ID: ${{ secrets.TEMPLATE_ID }}
+      USER_ID: ${{ secrets.USER_ID }}
+      QQ_EMAIL_ADDRESS: ${{ secrets.QQ_EMAIL_ADDRESS }}
+      QQ_SMTP_PASSWORD: ${{ secrets.QQ_SMTP_PASSWORD }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+        architecture: 'x64'
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: Run script and capture output
+      id: run_script
+      run: |
+        python main.py 2>&1 | tee script_output.log
+
+    - name: Send email on success or failure
+      if: always()  # This ensures the step runs regardless of the result of the previous steps
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.qq.com
+        server_port: 465
+        username: ${{ secrets.QQ_EMAIL_ADDRESS }}
+        password: ${{ secrets.QQ_SMTP_PASSWORD }}
+        subject: GitHub Actions Job ${{ job.status }}
+        body: |
+          The job named ${{ job.name }} has finished with status: ${{ job.status }}.
+          Here is the log output:
+          
+          ${{ steps.run_script.outputs.log }}
+        to: ${{ secrets.QQ_EMAIL_ADDRESS }}
+        from: ${{ secrets.QQ_EMAIL_ADDRESS }}
+        secure: true
+
+    - name: Upload logs as artifact
+      if: always()  # This ensures the step runs regardless of the result of the previous steps
+      uses: actions/upload-artifact@v3
+      with:
+        name: script-output
+        path: script_output.log
