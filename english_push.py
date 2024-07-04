@@ -24,12 +24,14 @@ def fetch_daily_english():
     从API获取每日英语和中文句子。
     
     Returns:
-        english_sentence (str): 英文句子.
-        chinese_sentence (str): 中文句子.
+        english_sentences (list): 英文句子列表，包含5个句子.
+        chinese_sentences (list): 中文句子列表，包含5个句子.
     """
     max_english_length = 120
     max_chinese_length = 40
     retries = 5
+    english_sentences = []
+    chinese_sentences = []
     
     for _ in range(retries):
         try:
@@ -50,13 +52,20 @@ def fetch_daily_english():
                 logging.warning("Chinese sentence exceeds maximum length, retrying...")
                 continue
             
-            return english_sentence, chinese_sentence
+            english_sentences.append(english_sentence)
+            chinese_sentences.append(chinese_sentence)
+            
+            # 如果已经获取到足够的句子，则跳出循环
+            if len(english_sentences) >= 5 and len(chinese_sentences) >= 5:
+                break
         
         except requests.RequestException as e:
             logging.error(f"Error fetching daily English: {e}")
     
-    logging.error("Failed to fetch suitable daily English and Chinese sentences after retries.")
-    return None, None
+    if len(english_sentences) < 5 or len(chinese_sentences) < 5:
+        logging.error("Failed to fetch suitable daily English and Chinese sentences after retries.")
+    
+    return english_sentences[:5], chinese_sentences[:5]
 
 def split_text(text, max_length):
     """
@@ -77,63 +86,60 @@ def split_text(text, max_length):
         parts.append(text)
     return parts
 
-def format_data(english_sentence, chinese_sentence):
+def format_data(english_sentences, chinese_sentences):
     """
     格式化英文和中文句子，按照要求存储到words列表中。
     
     Args:
-        english_sentence (str): 英文句子.
-        chinese_sentence (str): 中文句子.
+        english_sentences (list): 英文句子列表，包含5个句子.
+        chinese_sentences (list): 中文句子列表，包含5个句子.
     
     Returns:
         words (list): 格式化后的句子列表，长度为20.
     """
-    # 分割英文和中文句子
-    english_parts = split_text(english_sentence, 60)
-    chinese_parts = split_text(chinese_sentence, 20)
-
-    # 构建words列表，存储英文和中文句子
     words = []
     
     # 存储英文句子
-    for i in range(min(len(english_parts), 5)):
-        words.append(english_parts[i])
+    for i in range(len(english_sentences)):
+        english_parts = split_text(english_sentences[i], 60)
+        for part in english_parts:
+            words.append(part)
     
     # 存储中文句子
-    for i in range(min(len(chinese_parts), 5)):
-        words.append(chinese_parts[i])
+    for i in range(len(chinese_sentences)):
+        chinese_parts = split_text(chinese_sentences[i], 20)
+        for part in chinese_parts:
+            words.append(part)
 
     # 填充到20个words
     while len(words) < 20:
         words.append("")
 
-    return words
+    return words[:20]
 
 try:
-    english_sentence = None
-    chinese_sentence = None
+    # 获取每日英语和中文句子
+    english_sentences, chinese_sentences = fetch_daily_english()
 
-    # 获取每日英语和中文句子，确保每次都能获取到合适长度的句子
-    while not english_sentence or len(english_sentence) > 120 or len(chinese_sentence) > 40:
-        english_sentence, chinese_sentence = fetch_daily_english()
-    
-    # 格式化句子并构建data字典
-    words = format_data(english_sentence, chinese_sentence)
-    data = {}
-    
-    # 组装data字典
-    for i in range(20):
-        data[f"words{i + 1}"] = {"value": words[i]}
+    if english_sentences and chinese_sentences:
+        # 格式化句子并构建data字典
+        words = format_data(english_sentences, chinese_sentences)
+        data = {}
+        
+        # 组装data字典
+        for i in range(20):
+            data[f"words{i + 1}"] = {"value": words[i]}
 
-    logging.info(f"Data to be sent: {data}")
-    
-    # 初始化微信客户端和消息对象
-    client = WeChatClient(app_id, app_secret)
-    wm = WeChatMessage(client)
+        logging.info(f"Data to be sent: {data}")
+        
+        # 初始化微信客户端和消息对象
+        client = WeChatClient(app_id, app_secret)
+        wm = WeChatMessage(client)
 
-    # 发送模板消息
-    response = wm.send_template(user_id, template_id, data)
-    logging.info(f"Message sent successfully: {response}")
-
+        # 发送模板消息
+        response = wm.send_template(user_id, template_id, data)
+        logging.info(f"Message sent successfully: {response}")
+    else:
+        logging.warning("Failed to fetch daily English and Chinese sentences.")
 except Exception as e:
     logging.error(f"An error occurred: {e}")
