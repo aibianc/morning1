@@ -46,18 +46,18 @@ try:
         weiyu = None
         for item in weiyu_list:
             if item.startswith("【微语】"):
-                
+               
                 break
         
         if weiyu:
             if len(weiyu) > 60:
                 weiyu = "早安"
             # 分割微语
-            weiyu1, weiyu2, weiyu3 = weiyu[:20], weiyu[20:40], weiyu[60:]
+            weiyu1, weiyu2, weiyu3 = weiyu[:20], weiyu[20:40], weiyu[40:] if len(weiyu) > 40 else ""
         else:
             logging.warning("No suitable 微语 found.")
     
-     # 获取诗句
+    # 获取诗句
     shici_url = "https://api.vvhan.com/api/ian/shici?type=json"
     shici_data = fetch_content(shici_url)
     if shici_data and shici_data.get('success', False):
@@ -75,8 +75,7 @@ try:
                     shici2 = ""
         else:
             shici1 = shici_content[:20]
-            shici2 = shici_content[20:]
-    
+            shici2 = shici_content[20:] if len(shici_content) > 20 else ""
     
     # 获取每日英语
     english_url = "https://api.vvhan.com/api/dailyEnglish?type=sj"
