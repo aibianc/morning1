@@ -27,7 +27,7 @@ def fetch_content(url):
         url (str): API的URL.
         
     Returns:
-        str: 获取的内容.
+        dict: 获取的内容的JSON格式.
     """
     max_attempts = 5
     for _ in range(max_attempts):
@@ -75,23 +75,16 @@ try:
         
         if weiyu:
             # 分割微语
-            weiyu1, weiyu2, weiyu3 = weiyu[:20], weiyu[20:40], weiyu[60:]
+            weiyu1, weiyu2, weiyu3 = weiyu[:60], weiyu[60:120], weiyu[120:]
         else:
             logging.warning("No suitable 微语 found.")
     
-    # 获取诗词
-    shici_url = "https://api.vvhan.com/api/ian/shici"
+    # 获取诗句
+    shici_url = "https://api.vvhan.com/api/ian/shici?type=json"
     shici_data = fetch_content(shici_url)
     if shici_data and shici_data.get('success', False):
-        shici_list = shici_data.get('data', [])
-        shici1 = shici2 = None
-        for i, shici in enumerate(shici_list):
-            if i == 0:
-                shici1 = shici[:40] if len(shici) > 40 else shici
-            elif i == 1:
-                shici2 = shici[:40] if len(shici) > 40 else shici
-            else:
-                break
+        shici_content = shici_data.get('data', {}).get('content', '')
+        shici1 = shici_content[:40] if len(shici_content) > 40 else shici_content
     
     # 获取摸鱼人日历
     moyu_url = "https://api.vvhan.com/api/moyu?type=json"
@@ -127,7 +120,6 @@ try:
         "weiyu2": {"value": weiyu2},
         "weiyu3": {"value": weiyu3},
         "shici1": {"value": shici1},
-        "shici2": {"value": shici2},
         "img1": {"value": img1},
         "img2": {"value": img2},
         "en": {"value": en},
