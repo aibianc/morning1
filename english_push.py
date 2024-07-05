@@ -46,7 +46,7 @@ try:
         weiyu = None
         for item in weiyu_list:
             if item.startswith("【微语】"):
-                weiyu = item[5:]  # 去掉"【微语】"
+                weiyu = item[4:]  # 去掉"【微语】"
                 break
         
         if weiyu:
