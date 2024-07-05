@@ -57,12 +57,25 @@ try:
         else:
             logging.warning("No suitable 微语 found.")
     
-    # 获取诗句
+     # 获取诗句
     shici_url = "https://api.vvhan.com/api/ian/shici?type=json"
     shici_data = fetch_content(shici_url)
     if shici_data and shici_data.get('success', False):
         shici_content = shici_data.get('data', {}).get('content', '')
-        shici1 = shici_content[:40] if len(shici_content) > 40 else shici_content
+        if len(shici_content) > 40:
+            # 重新获取诗句
+            shici_data = fetch_content(shici_url)
+            if shici_data and shici_data.get('success', False):
+                shici_content = shici_data.get('data', {}).get('content', '')
+                if len(shici_content) > 40:
+                    shici1 = shici_content[:20]
+                    shici2 = shici_content[20:]
+                else:
+                    shici1 = shici_content[:20]
+                    shici2 = ""
+        else:
+            shici1 = shici_content[:20]
+            shici2 = shici_content[20:]
     
     
     # 获取每日英语
@@ -90,8 +103,7 @@ try:
         "weiyu2": {"value": weiyu2},
         "weiyu3": {"value": weiyu3},
         "shici1": {"value": shici1},
-        "img1": {"value": img1},
-        "img2": {"value": img2},
+        "shici2": {"value": shici2},
         "en": {"value": en},
         "cn": {"value": cn}
     }
