@@ -27,39 +27,15 @@ def fetch_content(url):
         url (str): API的URL.
         
     Returns:
-        dict: 获取的内容的JSON格式.
+        dict: 获取的内容的JSON格式，如果请求失败则返回None。
     """
-    max_attempts = 5
-    for _ in range(max_attempts):
-        try:
-            response = requests.get(url)
-            response.raise_for_status()
-            data = response.json()
-            return data
-        except requests.RequestException as e:
-            logging.error(f"Error fetching data from {url}: {e}")
-    
-    logging.error(f"Failed to fetch data from {url} after {max_attempts} attempts.")
-    return None
-
-def split_text(text, max_length):
-    """
-    将文本按最大长度分割成多段。
-    
-    Args:
-        text (str): 需要分割的文本.
-        max_length (int): 每段最大长度.
-    
-    Returns:
-        list: 分割后的文本段落列表.
-    """
-    parts = []
-    while len(text) > max_length:
-        parts.append(text[:max_length])
-        text = text[max_length:]
-    if text:
-        parts.append(text)
-    return parts
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException as e:
+        logging.error(f"Error fetching data from {url}: {e}")
+        return None
 
 try:
     # 获取微语
@@ -70,12 +46,14 @@ try:
         weiyu = None
         for item in weiyu_list:
             if item.startswith("【微语】"):
-                weiyu = item[5:]  # 去掉"【微语】"
+                
                 break
         
         if weiyu:
+            if len(weiyu) > 60:
+                weiyu = "早安"
             # 分割微语
-            weiyu1, weiyu2, weiyu3 = weiyu[:60], weiyu[60:120], weiyu[120:]
+            weiyu1, weiyu2, weiyu3 = weiyu[:20], weiyu[20:40], weiyu[60:]
         else:
             logging.warning("No suitable 微语 found.")
     
@@ -86,14 +64,6 @@ try:
         shici_content = shici_data.get('data', {}).get('content', '')
         shici1 = shici_content[:40] if len(shici_content) > 40 else shici_content
     
-    # 获取摸鱼人日历
-    moyu_url = "https://api.vvhan.com/api/moyu?type=json"
-    moyu_data = fetch_content(moyu_url)
-    img1 = img2 = None
-    if moyu_data and moyu_data.get('success', False):
-        img_url = moyu_data.get('url', '')
-        if img_url:
-            img1 = img_url
     
     # 获取每日英语
     english_url = "https://api.vvhan.com/api/dailyEnglish?type=sj"
