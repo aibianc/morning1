@@ -1,6 +1,7 @@
 import requests
 import logging
 import os
+from datetime import datetime
 
 from wechatpy import WeChatClient
 from wechatpy.client.api import WeChatMessage
@@ -87,33 +88,30 @@ def format_data(english_sentences, chinese_sentences):
     words = [""] * 20
     
     # 存储句子到指定位置
-    index_mapping = [
-        (0, 1),  # 第一次请求的英文存到words1和words2
-        (2, 3),  # 第一次请求的中文存到words3和words4
-        (4, 5),  # 第二次请求的英文存到words5和words6
-        (6, 7),  # 第二次请求的中文存到words7和words8
-        (8, 9),  # 第三次请求的英文存到words9和words10
-        (10, 11), # 第三次请求的中文存到words11和words12
-        (12, 13), # 第四次请求的英文存到words13和words14
-        (14, 15), # 第四次请求的中文存到words15和words16
-        (16, 17), # 第五次请求的英文存到words17和words18
-        (18, 19)  # 第五次请求的中文存到words19和words20
-    ]
-
-    for i, (eng_index, chi_index) in enumerate(index_mapping):
-        if i < len(english_sentences) and english_sentences[i]:
+    for i in range(len(english_sentences)):
+        if i < 5:
+            eng_index = i * 4
+            chi_index = i * 4 + 1
             english_parts = split_text(english_sentences[i], 60)
-            for j, part in enumerate(english_parts):
-                if eng_index + j < len(words):
-                    words[eng_index + j] = part
-
-        if i < len(chinese_sentences) and chinese_sentences[i]:
             chinese_parts = split_text(chinese_sentences[i], 20)
-            for j, part in enumerate(chinese_parts):
-                if chi_index + j < len(words):
-                    words[chi_index + j] = part
+
+            if len(english_parts) > 0:
+                words[eng_index] = english_parts[0]
+            if len(chinese_parts) > 0:
+                words[chi_index] = chinese_parts[0]
 
     return words
+
+def get_current_weekday():
+    """
+    获取当前的星期几。
+    
+    Returns:
+        weekday (str): 当前星期几.
+    """
+    days = ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期天"]
+    today = datetime.now().weekday()
+    return days[today]
 
 try:
     # 获取每日英语和中文句子
@@ -137,6 +135,9 @@ try:
         # 组装data字典
         for i in range(20):
             data[f"words{i + 1}"] = {"value": words[i]}
+        
+        # 添加当前星期几到字典中
+        data["test1"] = {"value": f"今天是{get_current_weekday()}"}
 
         logging.info(f"Data to be sent: {data}")
         
