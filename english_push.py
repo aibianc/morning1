@@ -29,13 +29,18 @@ def fetch_content(url):
     Returns:
         dict: 获取的内容的JSON格式，如果请求失败则返回None。
     """
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-        return response.json()
-    except requests.RequestException as e:
-        logging.error(f"Error fetching data from {url}: {e}")
-        return None
+    max_attempts = 3  # 最大重试次数
+    for attempt in range(1, max_attempts + 1):
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            data = response.json()
+            return data
+        except requests.RequestException as e:
+            logging.error(f"Attempt {attempt}: Error fetching data from {url}: {e}")
+    
+    logging.error(f"Failed to fetch data from {url} after {max_attempts} attempts.")
+    return None
 
 try:
     # 获取微语
@@ -49,13 +54,14 @@ try:
                 weiyu = item[4:]  # 去掉"【微语】"
                 break
         
-        if weiyu:
-            if len(weiyu) > 60:
-                weiyu = "早安"
-            # 分割微语
-            weiyu1, weiyu2, weiyu3 = weiyu[:20], weiyu[20:40], weiyu[40:] if len(weiyu) > 40 else ""
-        else:
-            logging.warning("No suitable 微语 found.")
+        if weiyu and len(weiyu) > 60:
+            weiyu = "早安"
+        
+        # 分割微语
+        weiyu1, weiyu2, weiyu3 = weiyu[:20], weiyu[20:40], weiyu[40:] if len(weiyu) > 40 else ""
+        
+    else:
+        logging.warning("No suitable 微语 found.")
     
     # 获取诗句
     shici_url = "https://api.vvhan.com/api/ian/shici?type=json"
@@ -76,6 +82,7 @@ try:
         else:
             shici1 = shici_content[:20]
             shici2 = shici_content[20:] if len(shici_content) > 20 else ""
+    
     
     # 获取每日英语
     english_url = "https://api.vvhan.com/api/dailyEnglish?type=sj"
