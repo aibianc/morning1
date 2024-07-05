@@ -75,7 +75,7 @@ try:
         
         if weiyu:
             # 分割微语
-            weiyu1, weiyu2, weiyu3 = weiyu[:60], weiyu[60:120], weiyu[120:]
+            weiyu1, weiyu2, weiyu3 = weiyu[:20], weiyu[20:40], weiyu[60:]
         else:
             logging.warning("No suitable 微语 found.")
     
