@@ -12,8 +12,8 @@ jobs:
     env:
       APP_ID: ${{ secrets.APP_ID }}
       APP_SECRET: ${{ secrets.APP_SECRET }}
-      TEMPLATE_ID: ${{ secrets.TEMPLATE_ID }}
-      USER_ID: ${{ secrets.USER_ID }}
+      TEMPLATE_ID: ${{ secrets.Y_YT_TEM_ID }}
+      USER_ID: ${{ secrets.Y_USER_ID }}
       QQ_EMAIL_ADDRESS: ${{ secrets.QQ_EMAIL_ADDRESS }}
       QQ_SMTP_PASSWORD: ${{ secrets.QQ_SMTP_PASSWORD }}
 
