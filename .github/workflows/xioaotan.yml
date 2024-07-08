@@ -1,4 +1,4 @@
-name: xiaoxiami
+name: xiaotan
 on:
   schedule:
     - cron: '0 0 * * *'
