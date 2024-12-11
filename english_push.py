@@ -1,6 +1,7 @@
 import requests
 import logging
 import os
+import random
 
 from wechatpy import WeChatClient
 from wechatpy.client.api import WeChatMessage
@@ -44,25 +45,39 @@ def fetch_content(url):
 
 try:
     # 获取微语
-    weiyu_url = "https://api.vvhan.com/api/60s"
-    weiyu_data = fetch_content(weiyu_url)
-    if weiyu_data and weiyu_data.get('success', False):
-        weiyu_list = weiyu_data.get('data', [])
-        weiyu = None
-        for item in weiyu_list:
-            if item.startswith("【微语】"):
-                weiyu = item[4:]  # 去掉"【微语】"
-                break
-        
-        if weiyu and len(weiyu) > 60:
-            weiyu = "早安"
-        
-        # 分割微语
-        weiyu1, weiyu2, weiyu3 = weiyu[:20], weiyu[20:40], weiyu[40:] if len(weiyu) > 40 else ""
-        
-    else:
-        logging.warning("No suitable 微语 found.")
     
+
+    # 定义情话字典
+    love_quotes = {
+        1: "小杨，因为有你，生活多才了一份甜蜜。",
+        2: "遇见小杨，是我今生最美的风景。",
+        3: "宝宝，无论天涯海角，我的心永远与你相随。",
+        4: "喜欢小杨，就像春风吹过心田，无法停止。",
+        5: "小杨，每一次心跳都在为你而跳动。",
+        6: "因为有你--宝宝，黑夜也变得温暖。",
+        7: "和你在一起的时光是我最珍贵的回忆。",
+        8: "世界上最幸福的事，就是遇见了你，宝宝。",
+        9: "想牵小杨的手，直到岁月的尽头。",
+        10: "宝宝，你是我心底最温柔的秘密。",
+        11: "小杨，在你眼中，我看到了整个世界。",
+        12: "杨，只要有你在，生活就充满了阳光。",
+        13: "杨，爱上你，是我人生中最正确的选择。",
+        14: "宝宝，你的微笑，是我最想守护的风景。",
+        15: "小杨今天也要记得开心喔！",
+    }
+
+    # 随机获取一条情话
+    weiyu = random.choice(list(love_quotes.values()))
+
+    # 如果情话超过60字符，替换为默认值
+    if len(weiyu) > 60:
+        weiyu = "早安"
+
+    # 分割微语
+    weiyu1, weiyu2, weiyu3 = weiyu[:20], weiyu[20:40], weiyu[40:] if len(weiyu) > 40 else ""
+
+
+
     # 获取诗句
     shici_url = "https://api.vvhan.com/api/ian/shici?type=json"
     shici_data = fetch_content(shici_url)
