@@ -79,7 +79,7 @@ try:
 
 
     # 获取诗句
-    shici_url = "https://api.vvhan.com/api/ian/shici?type=json"
+    shici_url = "https://v2.alapi.cn/api/shici?type=all&token=LwExDtUWhF3rH5ib"
     shici_data = fetch_content(shici_url)
     if shici_data and shici_data.get('success', False):
         shici_content = shici_data.get('data', {}).get('content', '')
@@ -88,6 +88,8 @@ try:
             shici_data = fetch_content(shici_url)
             if shici_data and shici_data.get('success', False):
                 shici_content = shici_data.get('data', {}).get('content', '')
+            else:
+                shici_content = "今天没搜到诗词喔，下次再尝试！"
                 if len(shici_content) > 40:
                     shici1 = shici_content[:20]
                     shici2 = shici_content[20:]
