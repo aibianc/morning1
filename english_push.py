@@ -83,8 +83,6 @@ try:
     shici_data = fetch_content(shici_url)
     if shici_data and shici_data.get('success', False):
         shici_content = shici_data.get('data', {}).get('content', '')
-     else:
-        shici_content = "今天没搜到诗词喔，下次再尝试！"
         if len(shici_content) > 40:
             # 重新获取诗句
             shici_data = fetch_content(shici_url)
