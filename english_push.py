@@ -83,13 +83,13 @@ try:
     shici_data = fetch_content(shici_url)
     if shici_data and shici_data.get('success', False):
         shici_content = shici_data.get('data', {}).get('content', '')
+     else:
+        shici_content = "今天没搜到诗词喔，下次再尝试！"
         if len(shici_content) > 40:
             # 重新获取诗句
             shici_data = fetch_content(shici_url)
             if shici_data and shici_data.get('success', False):
                 shici_content = shici_data.get('data', {}).get('content', '')
-            else:
-                shici_content = "今天没搜到诗词喔，下次再尝试！"
                 if len(shici_content) > 40:
                     shici1 = shici_content[:20]
                     shici2 = shici_content[20:]
@@ -102,12 +102,12 @@ try:
     
     
     # 获取每日英语
-    english_url = "https://api.vvhan.com/api/dailyEnglish?type=sj"
+    english_url = "http://apis.juhe.cn/fapigx/everyday/query?key=1a0390cada66130384a85c601cd63b5a"
     english_data = fetch_content(english_url)
     en = cn = None
     if english_data and english_data.get('success', False):
-        en = english_data['data'].get('en', '')
-        cn = english_data['data'].get('zh', '')
+        en = english_data['result'].get('content', '')
+        cn = english_data['result'].get('note', '')
         
         # 检查英文和中文长度，超过指定长度重新获取
         if len(en) > 60 or len(cn) > 20:
